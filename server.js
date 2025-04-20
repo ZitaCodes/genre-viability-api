@@ -26,6 +26,16 @@ const shuffledUniqueAuthors = [...new Set(allAuthors)]
   .sort(() => 0.5 - Math.random())
   .slice(0, 3);
 
+  const kuLow = 2.99;
+const kuHigh = 4.99;
+const mainstreamLow = 4.99;
+const mainstreamHigh = 6.99;
+
+const suggestedLow = ((kuLow + mainstreamLow) / 2).toFixed(2);
+const suggestedHigh = ((kuHigh + mainstreamHigh) / 2).toFixed(2);
+
+const suggestedRange = `$${suggestedLow} – $${suggestedHigh}`;
+  
 const viabilityResponse = {
   subgenre_entered: subgenre,
   average_price: 4.99,
@@ -33,6 +43,7 @@ const viabilityResponse = {
   ku_trend: "84% likely in Kindle Unlimited",
   price_range_ku: "$2.99 – $4.99",
   price_range_mainstream: "$4.99 – $6.99",
+  price_range_suggested: suggestedRange,
   pricing_logic: "Based on similar books in this subgenre, the suggested price range aligns with current online booksellers and reader expectations.",
   authors_in_genre: shuffledUniqueAuthors
 };
