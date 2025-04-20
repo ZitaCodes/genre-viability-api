@@ -12,14 +12,10 @@ app.post('/api/check-genre', (req, res) => {
 
   // Example: booksFiltered is your array of books that match the genre
 // Simulated book matches — replace this later with real filtered data
-const booksFiltered = [
-  { author: "Ruby Star" },
-  { author: "Samantha Dee" },
-  { author: "S.J. Sanders" },
-  { author: "Honey Phillips" },
-  { author: "Ella Maven" },
-  { author: "Tasha Black" }
-];
+const booksFiltered = booksData.filter(book =>
+  book.genre.toLowerCase().includes(subgenre.toLowerCase())
+);
+
 
 const allAuthors = booksFiltered.map(book => book.author).filter(Boolean);
 
