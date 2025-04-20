@@ -27,7 +27,7 @@ const shuffledUniqueAuthors = [...new Set(allAuthors)]
   .slice(0, 3);
 
 const viabilityResponse = {
-  subgenre_entered: genre,
+  subgenre_entered: subgenre,
   average_price: 4.99,
   average_page_count: 283,
   ku_trend: "84% likely in Kindle Unlimited",
