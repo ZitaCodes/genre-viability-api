@@ -32,10 +32,7 @@ app.post('/api/check-genre', async (req, res) => {
     );
 
     const books = response.data.results[0].content.products || [];
-
-    // Cap at 300
     const topBooks = books.slice(0, 300);
-
     const filtered = topBooks.filter(b =>
       JSON.stringify(b).toLowerCase().includes(subgenre.toLowerCase())
     );
@@ -74,10 +71,14 @@ app.post('/api/check-genre', async (req, res) => {
       authors_in_genre: shuffled
     });
 
-    // Start the server by binding to a port
-    const PORT = process.env.PORT || 10000;
+  } catch (error) {
+    console.error("Scraper error:", error.message);
+    res.status(500).json({ error: "Failed to scrape data. Please try again later." });
+  }
+});
 
-    app.listen(PORT, () => {
+// ✅ MOVE THIS TO BOTTOM OUTSIDE ROUTE
+app.listen(PORT, () => {
   console.log(`✅ Genre Viability API running on port ${PORT}`);
 });
 
