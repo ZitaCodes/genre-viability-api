@@ -14,22 +14,26 @@ app.post('/api/check-genre', async (req, res) => {
   const { subgenre } = req.body;
 
   try {
-    const response = await axios.post(
-      'https://realtime.oxylabs.io/v1/queries',
-      {
-        source: 'amazon_search',
-        domain: 'amazon.com',
-        query: `${subgenre} books`,
-        geo_location: 'United States',
-        parse: true
-      },
-      {
-        auth: {
-          username: process.env.OXYLABS_USER,
-          password: process.env.OXYLABS_PASS
-        }
-      }
-    );
+   console.log("📤 Sending to Oxylabs:", subgenre);  // 👈 Add this line
+   const response = await axios.post(
+  'https://realtime.oxylabs.io/v1/queries',
+  {
+    source: 'amazon_search',
+    domain: 'amazon.com',
+    query: `${subgenre} books`,
+    geo_location: 'United States',
+    parse: true
+  },
+  {
+    auth: {
+      username: process.env.OXYLABS_USER,
+      password: process.env.OXYLABS_PASS
+    },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+);
 
     const books = response.data.results[0].content.products || [];
     const topBooks = books.slice(0, 300);
