@@ -16,23 +16,53 @@ app.post('/api/check-genre', async (req, res) => {
   const searchQuery = `${subgenre} ${subject}`.trim();
   console.log("📦 Querying Oxylabs:", searchQuery);
 
-  try {
-    const response = await axios.post(
-      'https://realtime.oxylabs.io/v1/queries',
-      {
-        source: 'amazon_search',
-        query: searchQuery,
-        parse: true
-      },
-      {
-        auth: {
-          username: process.env.OXYLABS_USER,
-          password: process.env.OXYLABS_PASS
-        },
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+ try {
+  console.log("🛰 Sending to Oxylabs:", subgenre, subject);
 
+  // Step 1: Try keyword + subject
+  let response = await axios.post('https://realtime.oxylabs.io/v1/queries', {
+    source: 'amazon_search',
+    query: `${subgenre} ${subject} books`,
+    geo_location: 'United States',
+    parse: true
+  }, {
+    auth: {
+      username: process.env.OXYLABS_USER,
+      password: process.env.OXYLABS_PASS
+    },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+
+  let results = response.data.results[0]?.content?.results || [];
+  let filtered = results.filter(b => b.price && b.page_count && b.title && b.url);
+
+  // Step 2: Fallback if no valid data
+  if (filtered.length === 0) {
+    console.log("⚠️ No valid books found, retrying with keyword only...");
+    let fallbackResponse = await axios.post('https://realtime.oxylabs.io/v1/queries', {
+      source: 'amazon_search',
+      query: `${subgenre} books`,
+      geo_location: 'United States',
+      parse: true
+    }, {
+      auth: {
+        username: process.env.OXYLABS_USER,
+        password: process.env.OXYLABS_PASS
+      },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    results = fallbackResponse.data.results[0]?.content?.results || [];
+    filtered = results.filter(b => b.price && b.page_count && b.title && b.url);
+    console.log("🔁 Fallback returned", filtered.length, "books.");
+  }
+
+
+    // Process `filtered` data as usual from here...
     const books = response.data.results[0]?.content?.products || [];
 
     // Cap at 300
@@ -84,7 +114,7 @@ app.post('/api/check-genre', async (req, res) => {
 
    } catch (error) {
     console.error("Scraper error:", error.message);
-    res.status(500).json({ error: "Failed to scrape data." });
+    res.status(500).json({ error: "Failed to scrape data. Please try again later." });
   }
 });
 
