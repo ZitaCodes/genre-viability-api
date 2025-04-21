@@ -74,6 +74,14 @@ app.post('/api/check-genre', async (req, res) => {
       authors_in_genre: shuffled
     });
 
+    // Start the server by binding to a port
+    const PORT = process.env.PORT || 10000;
+
+    app.listen(PORT, () => {
+  console.log(`✅ Genre Viability API running on port ${PORT}`);
+});
+
+   
    } catch (error) {
     console.error("Scraper error:", error.message);
     res.status(500).json({ error: "Failed to scrape data. Please try again later." });
