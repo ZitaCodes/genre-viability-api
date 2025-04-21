@@ -18,14 +18,14 @@ app.post('/api/check-genre', async (req, res) => {
 
  try {
   console.log("🛰 Sending to Oxylabs:", subgenre, subject);
-  console.log("🧪 Raw query string:", `${subgenre} ${subject} books`);
+  console.log("🧪 Raw query string:", `${subgenre} ${subject}`);
   console.log("🔐 Oxylabs Auth:", process.env.OXYLABS_USER, process.env.OXYLABS_PASS ? "[REDACTED]" : "Missing");
  
 
   // Step 1: Try keyword + subject
   let response = await axios.post('https://realtime.oxylabs.io/v1/queries', {
     source: 'amazon_search',
-    query: `${subgenre} ${subject} books`,
+    query: `${subgenre} ${subject}`,
     geo_location: 'United States',
     parse: true
   }, {
@@ -50,7 +50,7 @@ app.post('/api/check-genre', async (req, res) => {
     console.log("⚠️ No valid books found, retrying with keyword only...");
     let fallbackResponse = await axios.post('https://realtime.oxylabs.io/v1/queries', {
       source: 'amazon_search',
-      query: `${subgenre} books`,
+      query: `${subgenre}`,
       geo_location: 'United States',
       parse: true
     }, {
@@ -68,7 +68,7 @@ app.post('/api/check-genre', async (req, res) => {
     let filtered = topBooks.filter(b =>
        b.price && (b.page_count || b.specifications?.pages) && b.title && b.url
 );
-    console.log("🔁 Fallback returned", filtered.length, "books.");
+    console.log(`🔁 Fallback returned ${filtered.length} results.`);
 
   }
 
