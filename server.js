@@ -20,7 +20,6 @@ app.post('/api/check-genre', async (req, res) => {
   {
     source: 'amazon_search',
     query: `${subgenre} books`,
-    geo_location: 'United States',
     parse: true
   },
   {
@@ -33,6 +32,7 @@ app.post('/api/check-genre', async (req, res) => {
     }
   }
 );
+
 
     const books = response.data.results[0].content.products || [];
     const topBooks = books.slice(0, 300);
