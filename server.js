@@ -36,8 +36,12 @@ app.post('/api/check-genre', async (req, res) => {
   });
 
   let results = response.data.results[0]?.content?.results || [];
-  let filtered = results.filter(b => b.price && b.page_count && b.title && b.url);
+  let topBooks = results.slice(0, 300);
+  let filtered = topBooks.filter(b =>
+    b.price && (b.page_count || b.specifications?.pages) && b.title && b.url
+);
 
+   
   // Step 2: Fallback if no valid data
   if (filtered.length === 0) {
     console.log("⚠️ No valid books found, retrying with keyword only...");
@@ -57,8 +61,12 @@ app.post('/api/check-genre', async (req, res) => {
     });
 
     results = fallbackResponse.data.results[0]?.content?.results || [];
-    filtered = results.filter(b => b.price && b.page_count && b.title && b.url);
+    let topBooks = results.slice(0, 300);
+    let filtered = topBooks.filter(b =>
+       b.price && (b.page_count || b.specifications?.pages) && b.title && b.url
+);
     console.log("🔁 Fallback returned", filtered.length, "books.");
+
   }
 
   // ✅ At this point, `filtered` is already set properly (either from original or fallback)
@@ -68,11 +76,11 @@ if (filtered.length === 0) {
 }
 
 const prices = filtered.map(b => parseFloat(b.price.raw.replace('$', '')));
-const pageCounts = filtered.map(b => parseInt(b.page_count || b.specifications?.pages));
+const pageCounts = filtered.map(b => parseInt(b.page_count || b.specifications?.pages)).filter(Boolean);
 const kuBooks = filtered.filter(b =>
   JSON.stringify(b).toLowerCase().includes('kindle unlimited')
 );
-const allAuthors = filtered.map(b => b.author?.name).filter(Boolean);
+const allAuthors = filtered.map(b => b.author?.name || b.author).filter(Boolean);
 const uniqueAuthors = [...new Set(allAuthors)];
 const shuffled = uniqueAuthors.sort(() => 0.5 - Math.random()).slice(0, 3);
 
