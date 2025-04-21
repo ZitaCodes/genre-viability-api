@@ -11,17 +11,17 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 app.post('/api/check-genre', async (req, res) => {
-  const { subgenre } = req.body;
+  const { subgenre, subject } = req.body;
+
+  const searchQuery = `${subgenre} ${subject}`.trim();
+  console.log("📦 Querying Oxylabs:", searchQuery);
 
   try {
-    console.log("📩 Sending to Oxylabs:", subgenre);
-
     const response = await axios.post(
       'https://realtime.oxylabs.io/v1/queries',
       {
         source: 'amazon_search',
-        query: `${subgenre} books`,
-        geo_location: 'United States',
+        query: searchQuery,
         parse: true
       },
       {
@@ -29,9 +29,7 @@ app.post('/api/check-genre', async (req, res) => {
           username: process.env.OXYLABS_USER,
           password: process.env.OXYLABS_PASS
         },
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       }
     );
 
@@ -84,9 +82,9 @@ app.post('/api/check-genre', async (req, res) => {
       authors_in_genre: shuffled
     });
 
-  } catch (error) {
+   } catch (error) {
     console.error("Scraper error:", error.message);
-    res.status(500).json({ error: "Failed to scrape data. Please try again later." });
+    res.status(500).json({ error: "Failed to scrape data." });
   }
 });
 
