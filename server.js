@@ -61,43 +61,33 @@ app.post('/api/check-genre', async (req, res) => {
     console.log("🔁 Fallback returned", filtered.length, "books.");
   }
 
+  // ✅ At this point, `filtered` is already set properly (either from original or fallback)
 
-    // Process `filtered` data as usual from here...
-    const books = response.data.results[0]?.content?.products || [];
+if (filtered.length === 0) {
+  console.log("⚠️ No valid books found after filtering.");
+}
 
-    // Cap at 300
-    const topBooks = books.slice(0, 300);
+const prices = filtered.map(b => parseFloat(b.price.raw.replace('$', '')));
+const pageCounts = filtered.map(b => parseInt(b.page_count || b.specifications?.pages));
+const kuBooks = filtered.filter(b =>
+  JSON.stringify(b).toLowerCase().includes('kindle unlimited')
+);
+const allAuthors = filtered.map(b => b.author?.name).filter(Boolean);
+const uniqueAuthors = [...new Set(allAuthors)];
+const shuffled = uniqueAuthors.sort(() => 0.5 - Math.random()).slice(0, 3);
 
-    // Filter books that match the genre and contain both price and page count
-    const filtered = topBooks.filter(b =>
-      JSON.stringify(b).toLowerCase().includes(subgenre.toLowerCase()) &&
-      b.price?.raw && b.specifications?.pages
-    );
+const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length || 0;
 
-    if (filtered.length === 0) {
-      console.log("⚠️ No valid books found after filtering.");
-    }
+const kuLow = Math.min(...prices.filter(p => p <= 4.99));
+const kuHigh = Math.max(...prices.filter(p => p <= 4.99));
+const msLow = Math.min(...prices.filter(p => p > 4.99));
+const msHigh = Math.max(...prices.filter(p => p > 4.99));
 
-    const prices = filtered.map(b => parseFloat(b.price.raw.replace('$', '')));
-    const pageCounts = filtered.map(b => parseInt(b.specifications.pages));
-    const kuBooks = filtered.filter(b =>
-      JSON.stringify(b).toLowerCase().includes('kindle unlimited')
-    );
-    const allAuthors = filtered.map(b => b.author?.name).filter(Boolean);
-    const uniqueAuthors = [...new Set(allAuthors)];
-    const shuffled = uniqueAuthors.sort(() => 0.5 - Math.random()).slice(0, 3);
+const suggestedLow = ((kuLow + msLow) / 2).toFixed(2);
+const suggestedHigh = ((kuHigh + msHigh) / 2).toFixed(2);
 
-    const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length || 0;
-
-    const kuLow = Math.min(...prices.filter(p => p <= 4.99));
-    const kuHigh = Math.max(...prices.filter(p => p <= 4.99));
-    const msLow = Math.min(...prices.filter(p => p > 4.99));
-    const msHigh = Math.max(...prices.filter(p => p > 4.99));
-
-    const suggestedLow = ((kuLow + msLow) / 2).toFixed(2);
-    const suggestedHigh = ((kuHigh + msHigh) / 2).toFixed(2);
-
-    const viabilityScore = Math.round((filtered.length / 300) * 100);
+const viabilityScore = Math.round((filtered.length / 300) * 100);
+   
 
     res.json({
       subgenre_entered: subgenre,
