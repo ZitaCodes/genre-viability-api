@@ -14,34 +14,44 @@ app.post('/api/check-genre', async (req, res) => {
   const { subgenre } = req.body;
 
   try {
-   console.log("📤 Sending to Oxylabs:", subgenre);  // 👈 Add this line
-   const response = await axios.post(
-  'https://realtime.oxylabs.io/v1/queries',
-  {
-    source: 'amazon_search',
-    query: `${subgenre} books`,
-    parse: true
-  },
-  {
-    auth: {
-      username: process.env.OXYLABS_USER,
-      password: process.env.OXYLABS_PASS
-    },
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
-);
+    console.log("📩 Sending to Oxylabs:", subgenre);
 
-
-    const books = response.data.results[0].content.products || [];
-    const topBooks = books.slice(0, 300);
-    const filtered = topBooks.filter(b =>
-      JSON.stringify(b).toLowerCase().includes(subgenre.toLowerCase())
+    const response = await axios.post(
+      'https://realtime.oxylabs.io/v1/queries',
+      {
+        source: 'amazon_search',
+        query: `${subgenre} books`,
+        geo_location: 'United States',
+        parse: true
+      },
+      {
+        auth: {
+          username: process.env.OXYLABS_USER,
+          password: process.env.OXYLABS_PASS
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
     );
 
-    const prices = filtered.map(b => parseFloat(b.price?.raw.replace('$', ''))).filter(Boolean);
-    const pageCounts = filtered.map(b => parseInt(b.specifications?.pages)).filter(Boolean);
+    const books = response.data.results[0]?.content?.products || [];
+
+    // Cap at 300
+    const topBooks = books.slice(0, 300);
+
+    // Filter books that match the genre and contain both price and page count
+    const filtered = topBooks.filter(b =>
+      JSON.stringify(b).toLowerCase().includes(subgenre.toLowerCase()) &&
+      b.price?.raw && b.specifications?.pages
+    );
+
+    if (filtered.length === 0) {
+      console.log("⚠️ No valid books found after filtering.");
+    }
+
+    const prices = filtered.map(b => parseFloat(b.price.raw.replace('$', '')));
+    const pageCounts = filtered.map(b => parseInt(b.specifications.pages));
     const kuBooks = filtered.filter(b =>
       JSON.stringify(b).toLowerCase().includes('kindle unlimited')
     );
@@ -79,6 +89,7 @@ app.post('/api/check-genre', async (req, res) => {
     res.status(500).json({ error: "Failed to scrape data. Please try again later." });
   }
 });
+
 
 // ✅ MOVE THIS TO BOTTOM OUTSIDE ROUTE
 app.listen(PORT, () => {
