@@ -74,5 +74,8 @@ app.post('/api/check-genre', async (req, res) => {
       authors_in_genre: shuffled
     });
 
-  } catch (error) {
-    console.error('
+   } catch (error) {
+    console.error("Scraper error:", error.message);
+    res.status(500).json({ error: "Failed to scrape data. Please try again later." });
+  }
+});
