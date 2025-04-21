@@ -18,6 +18,9 @@ app.post('/api/check-genre', async (req, res) => {
 
  try {
   console.log("🛰 Sending to Oxylabs:", subgenre, subject);
+  console.log("🧪 Raw query string:", `${subgenre} ${subject} books`);
+  console.log("🔐 Oxylabs Auth:", process.env.OXYLABS_USER, process.env.OXYLABS_PASS ? "[REDACTED]" : "Missing");
+ 
 
   // Step 1: Try keyword + subject
   let response = await axios.post('https://realtime.oxylabs.io/v1/queries', {
