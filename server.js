@@ -19,7 +19,6 @@ app.post('/api/check-genre', async (req, res) => {
   'https://realtime.oxylabs.io/v1/queries',
   {
     source: 'amazon_search',
-    domain: 'amazon.com',
     query: `${subgenre} books`,
     geo_location: 'United States',
     parse: true
