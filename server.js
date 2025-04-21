@@ -6,7 +6,7 @@ const booksData = require('./booksData');
 app.use(cors());
 app.use(express.json());
 
-// Genre Viability Endpoint
+// Genre Viability Endpoint here
 app.post('/api/check-genre', (req, res) => {
   const { subgenre } = req.body;
 
