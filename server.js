@@ -82,9 +82,3 @@ app.listen(PORT, () => {
   console.log(`✅ Genre Viability API running on port ${PORT}`);
 });
 
-   
-   } catch (error) {
-    console.error("Scraper error:", error.message);
-    res.status(500).json({ error: "Failed to scrape data. Please try again later." });
-  }
-});
